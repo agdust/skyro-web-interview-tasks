@@ -1,15 +1,22 @@
 import { ChangeEvent, useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 import { superheroApi } from '~entities/superhero';
+import { useFavorites } from '~entities/superhero/favorites';
 
 import { debounce } from '~shared/debounce';
+
+import SearchCard from './search-card';
 
 const searchParamId = 'search';
 
 function Search() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialQuery = searchParams.get(searchParamId) ?? '';
+
+  const favorites = useFavorites();
+
+  console.log('favorites', favorites.items, favorites);
 
   const [inputValue, setInputValue] = useState<string>(initialQuery);
   const [query, setQuery] = useState<string>(initialQuery);
@@ -80,14 +87,16 @@ function Search() {
         <div className="mt-4">
           <div>Results</div>
           <ul className="mt-2">
-            {searchResult.map((superhero, superheroIndex) => (
-              <li key={superhero.id}>
-                <Link to={`/${superhero.id}`} className="text-xl">
-                  {superheroIndex + 1}. {superhero.name}
-                </Link>
-              </li>
+            {searchResult.map((superhero) => (
+              <SearchCard
+                key={superhero.id}
+                superhero={superhero}
+                isFavorite={favorites.items[superhero.id]}
+                onToggle={() => {
+                  favorites.toggle(superhero.id);
+                }}
+              />
             ))}
-            
           </ul>
         </div>
       )}
