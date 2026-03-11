@@ -2,7 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
-import Search from '~app/search/search';
+import Search from '~features/search/search';
 
 import { SuperheroPage } from '~pages/superhero/superhero-page';
 
