@@ -4,7 +4,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import { SuperheroPage } from '~pages/superhero/superhero-page';
 
-import { Search } from '~features/search/search';
+import { Search } from '~widgets/search';
 
 import { Layout } from './app/layout/layout';
 import { Providers } from './app/providers';
