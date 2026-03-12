@@ -1,5 +1,9 @@
 import { config } from '~shared/config';
-import { ResponseError, ResponseSuccess } from '~shared/response';
+import {
+  isErrorResponse,
+  ResponseError,
+  ResponseSuccess,
+} from '~shared/response';
 
 import { skipToken, useQuery } from '@tanstack/react-query';
 
@@ -17,27 +21,33 @@ export function useSuperhero(params: Params) {
   return useQuery({
     queryKey: superheroKeys.superhero(id ?? ''),
     queryFn: id
-      ? async () => {
-          const response: ResponseSuccess<Superhero> = await fetch(
+      ? async ({ signal }) => {
+          const response = await fetch(
             `${config.apiHost}/api/${config.apiToken}/${id}`,
             {
+              signal,
               headers: {
                 Accept: 'application/json',
               },
             }
-          ).then(async (res) => {
-            if (!res.ok) {
-              const error: ResponseError = await res.json();
+          );
 
-              throw new Error(
-                `Error ${res.status}: ${res.statusText} - ${error.error}`
-              );
-            }
+          const responseJson: ResponseError | ResponseSuccess<Superhero> =
+            await response.json();
 
-            return res.json();
-          });
+          if (isErrorResponse(responseJson)) {
+            throw new Error(responseJson.error);
+          }
 
-          return response;
+          if (response.ok) {
+            return responseJson;
+          }
+
+          const errorMessage =
+            'error' in responseJson ? responseJson.error : response.statusText;
+          throw new Error(
+            `Error ${response.status}: ${response.statusText} - ${errorMessage}`
+          );
         }
       : skipToken,
   });

@@ -44,18 +44,17 @@ export function useSearchSuperheros(params: Params) {
           const responseJson: ResponseError | ResponseSuccess<ResponsePayload> =
             await response.json();
 
-          if (response.ok) {
-            if (isErrorResponse(responseJson)) {
-              // NOTE: фиксим косяк бэкенда, который отдаёт error когда ничего не найдено.
-              // Так как нет отдельного поля для errorCode, приходится завязываться на текст ошибки,
-              // чтобы отличить NotFound от _реальных_ ошибок.
-              if (
-                responseJson.error === 'character with given name not found'
-              ) {
-                return [];
-              }
-              throw new Error(responseJson.error);
+          if (isErrorResponse(responseJson)) {
+            // NOTE: фиксим косяк бэкенда, который отдаёт error когда ничего не найдено.
+            // Так как нет отдельного поля для errorCode, приходится завязываться на текст ошибки,
+            // чтобы отличить NotFound от _реальных_ ошибок.
+            if (responseJson.error === 'character with given name not found') {
+              return [];
             }
+            throw new Error(responseJson.error);
+          }
+
+          if (response.ok) {
             return responseJson.results;
           }
 
