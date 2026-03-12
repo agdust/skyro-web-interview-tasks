@@ -4,16 +4,32 @@ import { useSearchParams } from 'react-router-dom';
 import { useFavorites } from '~features/favorites';
 
 import { superheroApi } from '~entities/superhero';
+import type { Superhero } from '~entities/superhero';
 
+import { LS_PREFIX } from '~shared/consts';
 import { debounce } from '~shared/debounce';
 
 import SearchCard from './search-card';
 
 const searchParamId = 'search';
 
+// NOTE: пишем в LS а не в урл чтобы консистентно
+// работало вне зависимости от навигации
+const ONLY_FAVORITES_LS_KEY = `${LS_PREFIX}only-favorites`;
+
+const writeOnlyFavoritesToLs = (newValue: boolean) => {
+  localStorage.setItem(ONLY_FAVORITES_LS_KEY, newValue.toString());
+};
+
+const readOnlyFavoritesFromLs = (): boolean => {
+  return localStorage.getItem(ONLY_FAVORITES_LS_KEY) === 'true';
+};
+
 function Search() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialQuery = searchParams.get(searchParamId) ?? '';
+
+  const [onlyFavorites, setOnlyFavorites] = useState(readOnlyFavoritesFromLs);
 
   const favorites = useFavorites();
 
@@ -47,10 +63,19 @@ function Search() {
     [] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
-  const onChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const onSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     setInputValue(event.target.value);
     debouncedSetQuery(event.target.value.trim());
   };
+
+  const onOnlyFavoritesChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setOnlyFavorites(event.target.checked);
+    writeOnlyFavoritesToLs(event.target.checked);
+  };
+
+  const filteredFavorites = Array.isArray(searchResult)
+    ? searchResult.filter((hero) => favorites.items[hero.id] !== undefined)
+    : searchResult;
 
   return (
     <div className="mt-6">
@@ -62,7 +87,7 @@ function Search() {
           name="search"
           value={inputValue}
           className="border-grey-700 mt-2 rounded-sm border-2"
-          onChange={onChange}
+          onChange={onSearchChange}
         />
       </label>
 
@@ -80,20 +105,42 @@ function Search() {
         </div>
       )}
 
-      {Array.isArray(searchResult) && searchResult.length > 0 && (
-        <ul className="mt-4 grid grid-cols-4 justify-between gap-4">
-          {searchResult.map((superhero) => (
-            <SearchCard
-              key={superhero.id}
-              superhero={superhero}
-              isFavorite={favorites.items[superhero.id]}
-              onToggle={() => {
-                favorites.toggle(superhero.id);
-              }}
-            />
-          ))}
-        </ul>
-      )}
+      {Array.isArray(searchResult) &&
+        Array.isArray(filteredFavorites) &&
+        searchResult.length > 0 && (
+          <div className="mt-4">
+            <label>
+              <input
+                type="checkbox"
+                name="only-favorites"
+                checked={onlyFavorites}
+                onChange={onOnlyFavoritesChange}
+              />
+              <span className="ml-2">Only favorites</span>
+            </label>
+
+            {onlyFavorites && filteredFavorites.length === 0 && (
+              <div className="mt-4 text-2xl text-red-900">
+                No favorite superheroes with this name found :(
+              </div>
+            )}
+
+            <ul className="mt-4 grid grid-cols-4 gap-4">
+              {(onlyFavorites ? filteredFavorites : searchResult).map(
+                (superhero) => (
+                  <SearchCard
+                    key={superhero.id}
+                    superhero={superhero}
+                    isFavorite={favorites.items[superhero.id]}
+                    onToggle={() => {
+                      favorites.toggle(superhero.id);
+                    }}
+                  />
+                )
+              )}
+            </ul>
+          </div>
+        )}
     </div>
   );
 }

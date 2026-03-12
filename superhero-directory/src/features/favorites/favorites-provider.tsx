@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 
-const FAVORITES_LS_KEY = 'superheroes_favorites';
+import { LS_PREFIX } from '~shared/consts';
+
+const FAVORITES_LS_KEY = `${LS_PREFIX}favorites`;
 
 type FavoritesState = {
   items: Record<string, boolean>;
@@ -23,7 +25,8 @@ const writeToLs = (data: Record<string, boolean>): void => {
 };
 
 export function FavoritesProvider({ children }: { children: React.ReactNode }) {
-  const [favorites, setFavorites] = useState<Record<string, boolean>>(readFromLs);
+  const [favorites, setFavorites] =
+    useState<Record<string, boolean>>(readFromLs);
 
   useEffect(() => {
     writeToLs(favorites);
