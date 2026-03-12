@@ -31,24 +31,25 @@ function Search() {
       debounce((value: string) => {
         setQuery(value);
         setSearchParams(
-          (prev) => {
+          (curParams) => {
+            const newParams = new URLSearchParams(curParams);
             if (value) {
-              prev.set(searchParamId, value);
+              newParams.set(searchParamId, value);
             } else {
-              prev.delete(searchParamId);
+              newParams.delete(searchParamId);
             }
-            return prev;
+            return newParams;
           },
           { replace: true }
         );
       }),
-    // NOTE: setSearchParams не обязательно трекать, это функция
+    // NOTE: setSearchParams не стабильна: https://github.com/remix-run/react-router/issues/9991
     [] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     setInputValue(event.target.value);
-    debouncedSetQuery(event.target.value);
+    debouncedSetQuery(event.target.value.trim());
   };
 
   return (
@@ -65,24 +66,21 @@ function Search() {
         />
       </label>
 
-      {/* NOTE: Тут дженерик внутренняя ошибка, саму её мы пользователю не показываем */}
       {error && (
         <div className="error color-red">
           Something went wrong, please try again later
         </div>
       )}
 
-      {/* NOTE: А тут бизнесовая ошибка, её нужно вывести в интерфейс */}
-      {typeof searchResult === 'string' && (
-        <div className="color-gray-800 text-xl">{searchResult}</div>
+      {isLoading && <div className="mt-4 text-2xl">Loading...</div>}
+
+      {Array.isArray(searchResult) && searchResult.length === 0 && (
+        <div className="mt-4 text-2xl text-red-900">
+          No superheroes found :(
+        </div>
       )}
 
-      {isLoading && <div className="loader">Loading...</div>}
-
-      {/* NOTE: Здесь мы полагаемся на логику бека что когда ничего не найдено то
-            прилетает ошибка а не пустой массив, поэтому проверку на длину не делаем
-      */}
-      {Array.isArray(searchResult) && (
+      {Array.isArray(searchResult) && searchResult.length > 0 && (
         <ul className="mt-4 grid grid-cols-4 justify-between gap-4">
           {searchResult.map((superhero) => (
             <SearchCard

@@ -22,7 +22,7 @@ export function useSuperhero(params: Params) {
             `${config.apiHost}/api/${config.apiToken}/${id}`,
             {
               headers: {
-                'Content-Type': 'application/json',
+                Accept: 'application/json',
               },
             }
           ).then(async (res) => {

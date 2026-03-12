@@ -30,29 +30,31 @@ export function useSearchSuperheros(params: Params) {
   return useQuery({
     queryKey: superheroKeys.search(query),
     queryFn: queryExists
-      ? async () => {
+      ? async ({ signal }) => {
           const response = await fetch(
             `${config.apiHost}/api/${config.apiToken}/search/${encodeURIComponent(query)}`,
             {
-              // FIXME: Как-будто гет запросу нужен Accept а не Content-Type?
+              signal,
               headers: {
-                'Content-Type': 'application/json',
+                Accept: 'application/json',
               },
             }
           );
 
-          // NOTE: я здесь убрал then, потому что смешивать его с async/await не оч хорошо.
-          // Но в рамках этого МР не менял логику в get-superhero
           const responseJson: ResponseError | ResponseSuccess<ResponsePayload> =
             await response.json();
 
           if (response.ok) {
-            // FIXME: здесь мы не бросаем исключение чтобы не триггерить ретраи, и вообще no found это не ошибка на самом деле.
-            // Если мы можем повлиять на бэкенд то надо это изменить, не должно быть 200 и error: true
-            //
-            // Здесь мы считаем что строка это ошибка, а массив это успех. Фикс этого безобразия за рамками этого МР
             if (isErrorResponse(responseJson)) {
-              return responseJson.error;
+              // NOTE: фиксим косяк бэкенда, который отдаёт error когда ничего не найдено.
+              // Так как нет отдельного поля для errorCode, приходится завязываться на текст ошибки,
+              // чтобы отличить NotFound от _реальных_ ошибок.
+              if (
+                responseJson.error === 'character with given name not found'
+              ) {
+                return [];
+              }
+              throw new Error(responseJson.error);
             }
             return responseJson.results;
           }
