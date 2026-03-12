@@ -31,16 +31,23 @@ export function SuperheroPage() {
           alt={superhero.name}
           className="mx-auto mb-4 block rounded-md shadow-md"
         />
-        <h1 className="mb-2 text-center text-4xl font-bold">
-          {superhero.name}
+
+        <div className="mb-2 flex justify-center">
+          <h1 className="text-center text-4xl font-bold">{superhero.name}</h1>
+
           <button
             type="button"
             className="ml-3 cursor-pointer text-3xl text-yellow-600"
             onClick={() => favorites.toggle(superhero.id)}
+            aria-label={
+              favorites.items[superhero.id]
+                ? 'Remove from favorites'
+                : 'Add to favorites'
+            }
           >
             {favorites.items[superhero.id] ? '★' : '☆'}
           </button>
-        </h1>
+        </div>
         <p className="text-center text-gray-600">
           {superhero.biography['full-name']}
         </p>

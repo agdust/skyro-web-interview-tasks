@@ -1,4 +1,11 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 import { LS_PREFIX } from '~shared/consts';
 
@@ -32,7 +39,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     writeToLs(favorites);
   }, [favorites]);
 
-  const toggle = (id: string) => {
+  const toggle = useCallback((id: string) => {
     setFavorites((prev) => {
       const next = { ...prev };
       if (next[id]) {
@@ -42,10 +49,18 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       }
       return next;
     });
-  };
+  }, []);
+
+  const contextValue = useMemo(
+    () => ({
+      items: favorites,
+      toggle,
+    }),
+    [favorites, toggle]
+  );
 
   return (
-    <FavoritesContext.Provider value={{ items: favorites, toggle }}>
+    <FavoritesContext.Provider value={contextValue}>
       {children}
     </FavoritesContext.Provider>
   );

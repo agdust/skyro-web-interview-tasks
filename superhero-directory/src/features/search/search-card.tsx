@@ -4,11 +4,15 @@ import type { Superhero } from '~entities/superhero';
 
 type SearchCardProps = {
   superhero: Superhero;
-  isFavorite: boolean;
+  isFavorite: boolean | undefined;
   onToggle: (id: string) => void;
 };
 
-function SearchCard({ superhero, isFavorite, onToggle }: SearchCardProps) {
+export function SearchCard({
+  superhero,
+  isFavorite,
+  onToggle,
+}: SearchCardProps) {
   return (
     <li className="flex-col rounded-md border border-gray-500 p-6">
       <img
@@ -29,6 +33,7 @@ function SearchCard({ superhero, isFavorite, onToggle }: SearchCardProps) {
           className="m-1 ml-2 cursor-pointer p-1 text-xl text-yellow-600"
           type="button"
           onClick={() => onToggle(superhero.id)}
+          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
         >
           {isFavorite ? '★' : '☆'}
         </button>
@@ -36,5 +41,3 @@ function SearchCard({ superhero, isFavorite, onToggle }: SearchCardProps) {
     </li>
   );
 }
-
-export default SearchCard;

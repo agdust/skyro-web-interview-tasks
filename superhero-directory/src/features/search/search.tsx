@@ -4,12 +4,11 @@ import { useSearchParams } from 'react-router-dom';
 import { useFavorites } from '~features/favorites';
 
 import { superheroApi } from '~entities/superhero';
-import type { Superhero } from '~entities/superhero';
 
 import { LS_PREFIX } from '~shared/consts';
 import { debounce } from '~shared/debounce';
 
-import SearchCard from './search-card';
+import { SearchCard } from './search-card';
 
 const searchParamId = 'search';
 
@@ -25,7 +24,7 @@ const readOnlyFavoritesFromLs = (): boolean => {
   return localStorage.getItem(ONLY_FAVORITES_LS_KEY) === 'true';
 };
 
-function Search() {
+export function Search() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialQuery = searchParams.get(searchParamId) ?? '';
 
@@ -73,9 +72,12 @@ function Search() {
     writeOnlyFavoritesToLs(event.target.checked);
   };
 
-  const filteredFavorites = Array.isArray(searchResult)
-    ? searchResult.filter((hero) => favorites.items[hero.id] !== undefined)
-    : searchResult;
+  const heroesToShow = useMemo(() => {
+    if (!Array.isArray(searchResult)) return searchResult;
+    if (!onlyFavorites) return searchResult;
+
+    return searchResult.filter((hero) => hero.id in favorites.items);
+  }, [onlyFavorites, searchResult, favorites]);
 
   return (
     <div className="mt-6">
@@ -105,8 +107,8 @@ function Search() {
         </div>
       )}
 
-      {Array.isArray(searchResult) &&
-        Array.isArray(filteredFavorites) &&
+      {Array.isArray(heroesToShow) &&
+        Array.isArray(searchResult) &&
         searchResult.length > 0 && (
           <div className="mt-4">
             <label>
@@ -119,15 +121,15 @@ function Search() {
               <span className="ml-2">Only favorites</span>
             </label>
 
-            {onlyFavorites && filteredFavorites.length === 0 && (
+            {onlyFavorites && heroesToShow.length === 0 && (
               <div className="mt-4 text-2xl text-red-900">
                 No favorite superheroes with this name found :(
               </div>
             )}
 
-            <ul className="mt-4 grid grid-cols-4 gap-4">
-              {(onlyFavorites ? filteredFavorites : searchResult).map(
-                (superhero) => (
+            {heroesToShow.length > 0 && (
+              <ul className="mt-4 grid grid-cols-4 gap-4">
+                {heroesToShow.map((superhero) => (
                   <SearchCard
                     key={superhero.id}
                     superhero={superhero}
@@ -136,13 +138,11 @@ function Search() {
                       favorites.toggle(superhero.id);
                     }}
                   />
-                )
-              )}
-            </ul>
+                ))}
+              </ul>
+            )}
           </div>
         )}
     </div>
   );
 }
-
-export default Search;
