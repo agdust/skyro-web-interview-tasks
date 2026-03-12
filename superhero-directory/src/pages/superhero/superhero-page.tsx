@@ -1,9 +1,12 @@
 import { useParams } from 'react-router-dom';
 
+import { useFavorites } from '~features/favorites';
+
 import { superheroApi } from '~entities/superhero';
 
 export function SuperheroPage() {
   const { id } = useParams();
+  const favorites = useFavorites();
   const {
     data: superhero,
     isLoading,
@@ -30,6 +33,13 @@ export function SuperheroPage() {
         />
         <h1 className="mb-2 text-center text-4xl font-bold">
           {superhero.name}
+          <button
+            type="button"
+            className="ml-3 cursor-pointer text-3xl text-yellow-600"
+            onClick={() => favorites.toggle(superhero.id)}
+          >
+            {favorites.items[superhero.id] ? '★' : '☆'}
+          </button>
         </h1>
         <p className="text-center text-gray-600">
           {superhero.biography['full-name']}

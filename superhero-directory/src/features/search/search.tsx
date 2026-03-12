@@ -1,8 +1,9 @@
 import { ChangeEvent, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
+import { useFavorites } from '~features/favorites';
+
 import { superheroApi } from '~entities/superhero';
-import { useFavorites } from '~entities/superhero/favorites';
 
 import { debounce } from '~shared/debounce';
 
@@ -15,8 +16,6 @@ function Search() {
   const initialQuery = searchParams.get(searchParamId) ?? '';
 
   const favorites = useFavorites();
-
-  console.log('favorites', favorites.items, favorites);
 
   const [inputValue, setInputValue] = useState<string>(initialQuery);
   const [query, setQuery] = useState<string>(initialQuery);
@@ -84,21 +83,18 @@ function Search() {
             прилетает ошибка а не пустой массив, поэтому проверку на длину не делаем
       */}
       {Array.isArray(searchResult) && (
-        <div className="mt-4">
-          <div>Results</div>
-          <ul className="mt-2">
-            {searchResult.map((superhero) => (
-              <SearchCard
-                key={superhero.id}
-                superhero={superhero}
-                isFavorite={favorites.items[superhero.id]}
-                onToggle={() => {
-                  favorites.toggle(superhero.id);
-                }}
-              />
-            ))}
-          </ul>
-        </div>
+        <ul className="mt-4 grid grid-cols-4 justify-between gap-4">
+          {searchResult.map((superhero) => (
+            <SearchCard
+              key={superhero.id}
+              superhero={superhero}
+              isFavorite={favorites.items[superhero.id]}
+              onToggle={() => {
+                favorites.toggle(superhero.id);
+              }}
+            />
+          ))}
+        </ul>
       )}
     </div>
   );
