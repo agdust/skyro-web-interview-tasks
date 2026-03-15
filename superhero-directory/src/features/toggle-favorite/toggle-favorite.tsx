@@ -1,4 +1,4 @@
-import { useFavorites } from '~features/favorites';
+import { useFavorites } from '~entities/favorites';
 
 type Props = {
   superheroId: string;

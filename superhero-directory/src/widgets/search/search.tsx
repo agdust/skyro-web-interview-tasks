@@ -1,8 +1,7 @@
 import { ChangeEvent, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-import { useFavorites } from '~features/favorites';
-
+import { useFavorites } from '~entities/favorites';
 import { superheroApi } from '~entities/superhero';
 
 import { LS_PREFIX } from '~shared/consts';

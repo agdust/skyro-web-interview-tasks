@@ -1,4 +1,4 @@
-import { FavoritesProvider } from '~features/favorites';
+import { FavoritesProvider } from '~entities/favorites';
 
 import { QueryClientProvider } from './react-query';
 
