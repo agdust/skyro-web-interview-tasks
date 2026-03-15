@@ -71,12 +71,18 @@ export function Search() {
     writeOnlyFavoritesToLs(event.target.checked);
   };
 
-  const heroesToShow = useMemo(() => {
-    if (!Array.isArray(searchResult)) return searchResult;
-    if (!onlyFavorites) return searchResult;
+  const favoriteHeroesFound = useMemo(() => {
+    if (!Array.isArray(searchResult)) return undefined;
+    if (!onlyFavorites) return undefined;
 
     return searchResult.filter((hero) => hero.id in favorites.items);
   }, [onlyFavorites, searchResult, favorites]);
+
+  const heroes = onlyFavorites ? favoriteHeroesFound : searchResult;
+  const gotData = Array.isArray(heroes);
+
+  const foundAnything = gotData && heroes.length > 0;
+  const foundNothing = gotData && heroes.length === 0;
 
   return (
     <div className="mt-6">
@@ -92,49 +98,41 @@ export function Search() {
         />
       </label>
 
-      {error && (
-        <div className="error color-red">
-          Something went wrong, please try again later
+      {foundAnything && (
+        <div className="mt-4">
+          <label>
+            <input
+              type="checkbox"
+              name="only-favorites"
+              checked={onlyFavorites}
+              onChange={onOnlyFavoritesChange}
+            />
+            <span className="ml-2">Only favorites</span>
+          </label>
+
+          {heroes.length > 0 && (
+            <ul className="mt-4 grid grid-cols-4 gap-4">
+              {heroes.map((superhero) => (
+                <SearchCard key={superhero.id} superhero={superhero} />
+              ))}
+            </ul>
+          )}
         </div>
       )}
 
       {isLoading && <div className="mt-4 text-2xl">Loading...</div>}
 
-      {Array.isArray(searchResult) && searchResult.length === 0 && (
+      {foundNothing && (
         <div className="mt-4 text-2xl text-red-900">
           No superheroes found :(
         </div>
       )}
 
-      {Array.isArray(heroesToShow) &&
-        Array.isArray(searchResult) &&
-        searchResult.length > 0 && (
-          <div className="mt-4">
-            <label>
-              <input
-                type="checkbox"
-                name="only-favorites"
-                checked={onlyFavorites}
-                onChange={onOnlyFavoritesChange}
-              />
-              <span className="ml-2">Only favorites</span>
-            </label>
-
-            {onlyFavorites && heroesToShow.length === 0 && (
-              <div className="mt-4 text-2xl text-red-900">
-                No favorite superheroes with this name found :(
-              </div>
-            )}
-
-            {heroesToShow.length > 0 && (
-              <ul className="mt-4 grid grid-cols-4 gap-4">
-                {heroesToShow.map((superhero) => (
-                  <SearchCard key={superhero.id} superhero={superhero} />
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
+      {error && !gotData && (
+        <div className="error color-red">
+          Something went wrong, please try again later
+        </div>
+      )}
     </div>
   );
 }
