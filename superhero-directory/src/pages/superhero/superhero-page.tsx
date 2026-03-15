@@ -1,12 +1,11 @@
 import { useParams } from 'react-router-dom';
 
-import { useFavorites } from '~features/favorites';
+import { ToggleFavorite } from '~features/toggle-favorite';
 
 import { superheroApi } from '~entities/superhero';
 
 export function SuperheroPage() {
   const { id } = useParams();
-  const favorites = useFavorites();
   const {
     data: superhero,
     isLoading,
@@ -27,7 +26,7 @@ export function SuperheroPage() {
     <article className="mx-auto rounded-md bg-white p-6 shadow-md">
       <header className="mb-6">
         <img
-          src={superhero.image.url}
+          src={superhero?.image?.url}
           alt={superhero.name}
           className="mx-auto mb-4 block rounded-md shadow-md"
         />
@@ -35,18 +34,7 @@ export function SuperheroPage() {
         <div className="mb-2 flex justify-center">
           <h1 className="text-center text-4xl font-bold">{superhero.name}</h1>
 
-          <button
-            type="button"
-            className="ml-3 cursor-pointer text-3xl text-yellow-600"
-            onClick={() => favorites.toggle(superhero.id)}
-            aria-label={
-              favorites.items[superhero.id]
-                ? 'Remove from favorites'
-                : 'Add to favorites'
-            }
-          >
-            {favorites.items[superhero.id] ? '★' : '☆'}
-          </button>
+          <ToggleFavorite superheroId={superhero.id} />
         </div>
         <p className="text-center text-gray-600">
           {superhero.biography['full-name']}

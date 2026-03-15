@@ -130,14 +130,7 @@ export function Search() {
             {heroesToShow.length > 0 && (
               <ul className="mt-4 grid grid-cols-4 gap-4">
                 {heroesToShow.map((superhero) => (
-                  <SearchCard
-                    key={superhero.id}
-                    superhero={superhero}
-                    isFavorite={favorites.items[superhero.id]}
-                    onToggle={() => {
-                      favorites.toggle(superhero.id);
-                    }}
-                  />
+                  <SearchCard key={superhero.id} superhero={superhero} />
                 ))}
               </ul>
             )}

@@ -1,23 +1,19 @@
 import { Link } from 'react-router-dom';
 
+import { ToggleFavorite } from '~features/toggle-favorite';
+
 import type { Superhero } from '~entities/superhero';
 
 type SearchCardProps = {
   superhero: Superhero;
-  isFavorite: boolean | undefined;
-  onToggle: (id: string) => void;
 };
 
-export function SearchCard({
-  superhero,
-  isFavorite,
-  onToggle,
-}: SearchCardProps) {
+export function SearchCard({ superhero }: SearchCardProps) {
   return (
     <li className="flex-col rounded-md border border-gray-500 p-6">
       <img
-        src={superhero.image.url}
-        alt={superhero.name}
+        src={superhero?.image?.url}
+        alt={superhero?.name ?? ''}
         // NOTE: в апи супергероев много картинок из superherodb,
         // а там лимиты стоят, картинки часто не грузятся,
         // так что делаем фолбек покрасивее
@@ -29,14 +25,7 @@ export function SearchCard({
           {superhero.name}
         </Link>
 
-        <button
-          className="m-1 ml-2 cursor-pointer p-1 text-xl text-yellow-600"
-          type="button"
-          onClick={() => onToggle(superhero.id)}
-          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-        >
-          {isFavorite ? '★' : '☆'}
-        </button>
+        <ToggleFavorite superheroId={superhero.id} />
       </div>
     </li>
   );
